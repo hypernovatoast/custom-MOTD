@@ -9,10 +9,6 @@ haURL="http://home.assistant.url:8123/api" #Replace with HA IP address.
 weatherNowURL="http://api.weatherapi.com/v1/current.json"
 lightsOutput="/scripts/output/ha-lights.txt"
 
-### Greeting
-clear
-printf "\nWelcome to REPTAR!\n"
-
 ### Function to pull current weather information
 ## replace parameter 'q' with your location. ZIP code or city should work
 weatherReport () {
