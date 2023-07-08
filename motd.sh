@@ -24,8 +24,27 @@ weatherReport () {
     printf "\nTime: $time\nLast Updated: $lastUpdate\nTemp: $temp\n"
 }
 
+### Function to pull current temps from the thermostats and echo whether they're running or not. 
+insideTemps() {
+    local indoorTemps=$(curl -s \
+        -H "Authorization: Bearer $haKey" \
+        -H "Content-Type: application/json" \
+        "$haURL"/states | \
+    jq -r '.[] | select((.entity_id | startswith("climate."))) | .attributes.friendly_name, .attributes.current_temperature, .state')
+    #local variables to separate the JQ results. 
+    #NOTE: If any additional items are added to the above arrey,the awk numbers for therm2 variables will need to be raised by a single digit per item added as awk command is pulling from a specific location in the array.
+    local therm1=$(echo "$indoorTemps" | awk 'NR==1')
+    local therm2=$(echo "$indoorTemps" | awk 'NR==4')
+    local therm1Temp=$(echo "$indoorTemps" | awk 'NR==2')
+    local therm2Temp=$(echo "$indoorTemps" | awk 'NR==5')
+    local isTherm1On=$(echo "$indoorTemps" | awk 'NR==3')
+    local isTherm2On=$(echo "$indoorTemps" | awk 'NR==6')
+
+    printf "\nHome:\n$therm1 temp is $therm1Temp and the fan is set to $isTherm1On\n$therm2 temp is $therm2Temp and the fan is set to $isTherm2On\n"
+}
+
 ### Function to query Home Assistant to see which lights are on and report back appropriately.
-haLightsOn () {
+lightsOn () {
     local lights=$(curl -s \
         -H "Authorization: Bearer $haKey" \
         -H "Content-Type: application/json" \
@@ -42,4 +61,5 @@ haLightsOn () {
 
 ##Script execution
 weatherReport
-haLightsOn
+insideTemps
+lightsOn
